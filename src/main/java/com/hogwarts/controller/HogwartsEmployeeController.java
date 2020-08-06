@@ -59,4 +59,40 @@ public class HogwartsEmployeeController {
 				.contentType(MediaType.parseMediaType("application/csv")).body(file);
 	}
 
+	@PostMapping("/employee-refresh")
+	public ResponseEntity<Resource> uploadEmployeeFile(@RequestParam("file") MultipartFile file) {
+		String filename = "EmployeeRefreshReport.csv";
+		InputStreamResource reportFile = new InputStreamResource(hogwartsEmployeeCSVService.updateEmployee(file));
+
+		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+				.contentType(MediaType.parseMediaType("application/csv")).body(reportFile);
+	}
+
+	@PostMapping("/imohq-refresh")
+	public ResponseEntity<Resource> uploadHQRefreshFile(@RequestParam("file") MultipartFile file) {
+		String filename = "HQRefreshReport.csv";
+		InputStreamResource reportFile = new InputStreamResource(hogwartsEmployeeCSVService.updateHQStatus(file));
+
+		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+				.contentType(MediaType.parseMediaType("application/csv")).body(reportFile);
+	}
+
+	@PostMapping("/sec-refresh")
+	public ResponseEntity<Resource> uploadSecRefreshFile(@RequestParam("file") MultipartFile file) {
+		String filename = "SecRefreshReport.csv";
+		InputStreamResource reportFile = new InputStreamResource(hogwartsEmployeeCSVService.updateSecStatus(file));
+
+		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+				.contentType(MediaType.parseMediaType("application/csv")).body(reportFile);
+	}
+
+	@PostMapping("/treas-refresh")
+	public ResponseEntity<Resource> uploadTreasRefreshFile(@RequestParam("file") MultipartFile file) {
+		String filename = "TreasRefreshReport.csv";
+		InputStreamResource reportFile = new InputStreamResource(hogwartsEmployeeCSVService.updateTreasStatus(file));
+
+		return ResponseEntity.ok().header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + filename)
+				.contentType(MediaType.parseMediaType("application/csv")).body(reportFile);
+	}
+
 }

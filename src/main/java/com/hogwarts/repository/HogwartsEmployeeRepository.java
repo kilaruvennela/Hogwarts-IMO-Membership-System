@@ -26,4 +26,7 @@ public interface HogwartsEmployeeRepository extends JpaRepository<HogwartsEmploy
 
 	@Query("SELECT DISTINCT he.caseStatus, COUNT(he) FROM HogwartsEmployee he WHERE he.caseStatus LIKE 'NM%' GROUP BY he.caseStatus")
 	public List<Object[]> nonMembAccuracy();
+
+	@Query("SELECT he.hogwartsEmployeeId FROM HogwartsEmployee he")
+	public List<HogwartsEmployeeId> findAllIds();
 }

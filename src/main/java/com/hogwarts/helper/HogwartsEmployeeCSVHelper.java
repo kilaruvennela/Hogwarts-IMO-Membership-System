@@ -9,7 +9,9 @@ import java.io.InputStreamReader;
 import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 import org.apache.commons.csv.CSVFormat;
 import org.apache.commons.csv.CSVParser;
@@ -195,4 +197,219 @@ public class HogwartsEmployeeCSVHelper {
 			throw new RuntimeException("Failed to import report data to CSV file: " + e.getMessage());
 		}
 	}
+
+	public static List<Map<String, String>> employeeData(InputStream inputStream) {
+		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+				CSVParser csvParser = new CSVParser(fileReader,
+						CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
+
+			List<Map<String, String>> employees = new ArrayList<Map<String, String>>();
+
+			Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+
+			for (CSVRecord csvRecord : csvRecords) {
+				String firstName = csvRecord.get("First-name");
+				String lastName = csvRecord.get("Last-name");
+				String section = csvRecord.get("Section");
+				String floor = csvRecord.get("Floor");
+				String emailAddress = csvRecord.get("Email-addr");
+
+				if (firstName.length() != 0 && lastName.length() != 0) {
+					Map<String, String> employee = new HashMap<String, String>();
+					employee.put("firstName", firstName);
+					employee.put("lastName", lastName);
+					employee.put("section", section);
+					employee.put("floor", floor);
+					employee.put("emailAddress", emailAddress);
+					employees.add(employee);
+				}
+			}
+			return employees;
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to parse Hogwarts Employee Data CSV file: " + e.getMessage());
+		}
+	}
+
+	public static ByteArrayInputStream employeeRefreshReportCSV(long initialMasterCount, long newEmployees,
+			long seperatedEmployees, long updatedMasterCount, long employeesWithInvalidSecFloor) {
+		final CSVFormat format = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.MINIMAL);
+
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+				CSVPrinter csvPrinter = new CSVPrinter(new PrintWriter(out), format);) {
+
+			List<String> row1 = Arrays.asList("Original Number of Employees on master file ",
+					String.valueOf(initialMasterCount));
+			csvPrinter.printRecord(row1);
+
+			List<String> row2 = Arrays.asList("Number of new employees added ", String.valueOf(newEmployees));
+			csvPrinter.printRecord(row2);
+
+			List<String> row3 = Arrays.asList("Number of seperated employees dropped ",
+					String.valueOf(seperatedEmployees));
+			csvPrinter.printRecord(row3);
+
+			List<String> row4 = Arrays.asList("Number of Employees on master file after updates",
+					String.valueOf(updatedMasterCount));
+			csvPrinter.printRecord(row4);
+
+			List<String> row5 = Arrays.asList("Number of employees with invalid section/floor ",
+					String.valueOf(employeesWithInvalidSecFloor));
+			csvPrinter.printRecord(row5);
+
+			csvPrinter.flush();
+			return new ByteArrayInputStream(out.toByteArray());
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to import employee refresh data to CSV file: " + e.getMessage());
+		}
+	}
+
+	public static List<Map<String, String>> hqData(InputStream inputStream) {
+		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+				CSVParser csvParser = new CSVParser(fileReader,
+						CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
+
+			List<Map<String, String>> hqStatusRecords = new ArrayList<Map<String, String>>();
+
+			Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+
+			for (CSVRecord csvRecord : csvRecords) {
+				String firstName = csvRecord.get("First-name");
+				String lastName = csvRecord.get("Last-name");
+				String hqMemb = csvRecord.get("HQ-memb");
+				if (firstName.length() != 0 && lastName.length() != 0) {
+					Map<String, String> hqStatusRecord = new HashMap<String, String>();
+					hqStatusRecord.put("firstName", firstName);
+					hqStatusRecord.put("lastName", lastName);
+					hqStatusRecord.put("hqMemb", hqMemb);
+					hqStatusRecords.add(hqStatusRecord);
+				}
+			}
+			return hqStatusRecords;
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to parse Hogwarts HQ Data CSV file: " + e.getMessage());
+		}
+	}
+
+	public static ByteArrayInputStream hqRefreshReportCSV(long notOnMasterFile, long notOnHQList, long changesMade) {
+		final CSVFormat format = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.MINIMAL);
+
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+				CSVPrinter csvPrinter = new CSVPrinter(new PrintWriter(out), format);) {
+
+			List<String> row1 = Arrays.asList("Number of employees not on Master File ",
+					String.valueOf(notOnMasterFile));
+			csvPrinter.printRecord(row1);
+
+			List<String> row2 = Arrays.asList("Number of employees not on IMO HQ list ", String.valueOf(notOnHQList));
+			csvPrinter.printRecord(row2);
+
+			List<String> row3 = Arrays.asList("Number of employees whose HQ-Memb status changed  ",
+					String.valueOf(changesMade));
+			csvPrinter.printRecord(row3);
+
+			csvPrinter.flush();
+			return new ByteArrayInputStream(out.toByteArray());
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to import HQ List refresh data to CSV file: " + e.getMessage());
+		}
+	}
+
+	public static List<Map<String, String>> secData(InputStream inputStream) {
+		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+				CSVParser csvParser = new CSVParser(fileReader,
+						CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
+
+			List<Map<String, String>> secStatusRecords = new ArrayList<Map<String, String>>();
+
+			Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+
+			for (CSVRecord csvRecord : csvRecords) {
+				String firstName = csvRecord.get("First-name");
+				String lastName = csvRecord.get("Last-name");
+				String emailAddress = csvRecord.get("Email-addr");
+				String secMemb = csvRecord.get("Sec-memb");
+				if (firstName.length() != 0 && lastName.length() != 0) {
+					Map<String, String> secStatusRecord = new HashMap<String, String>();
+					secStatusRecord.put("firstName", firstName);
+					secStatusRecord.put("lastName", lastName);
+					secStatusRecord.put("emailAddress", emailAddress);
+					secStatusRecord.put("secMemb", secMemb);
+					secStatusRecords.add(secStatusRecord);
+				}
+			}
+			return secStatusRecords;
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to parse Hogwarts Secretary Data CSV file: " + e.getMessage());
+		}
+	}
+
+	public static ByteArrayInputStream secRefreshReportCSV(long emailChanges, long secMembChanges) {
+		final CSVFormat format = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.MINIMAL);
+
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+				CSVPrinter csvPrinter = new CSVPrinter(new PrintWriter(out), format);) {
+
+			List<String> row1 = Arrays.asList("Number of employees whose Emial Address changed ",
+					String.valueOf(emailChanges));
+			csvPrinter.printRecord(row1);
+
+			List<String> row2 = Arrays.asList("Number of employees whose Secretary Membership changed ",
+					String.valueOf(secMembChanges));
+			csvPrinter.printRecord(row2);
+
+			csvPrinter.flush();
+			return new ByteArrayInputStream(out.toByteArray());
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to import Secretary List refresh data to CSV file: " + e.getMessage());
+		}
+	}
+
+	public static List<Map<String, String>> treasData(InputStream inputStream) {
+		try (BufferedReader fileReader = new BufferedReader(new InputStreamReader(inputStream, "UTF-8"));
+				CSVParser csvParser = new CSVParser(fileReader,
+						CSVFormat.DEFAULT.withFirstRecordAsHeader().withIgnoreHeaderCase().withTrim());) {
+
+			List<Map<String, String>> treasStatusRecords = new ArrayList<Map<String, String>>();
+
+			Iterable<CSVRecord> csvRecords = csvParser.getRecords();
+
+			for (CSVRecord csvRecord : csvRecords) {
+				String firstName = csvRecord.get("First-name");
+				String lastName = csvRecord.get("Last-name");
+				String sigFilename = csvRecord.get("Sig-filename");
+				if (firstName.length() != 0 && lastName.length() != 0) {
+					Map<String, String> treasStatusRecord = new HashMap<String, String>();
+					treasStatusRecord.put("firstName", firstName);
+					treasStatusRecord.put("lastName", lastName);
+					treasStatusRecord.put("sigFilename", sigFilename);
+					treasStatusRecords.add(treasStatusRecord);
+				}
+			}
+			return treasStatusRecords;
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to parse Hogwarts Treasurer Data CSV file: " + e.getMessage());
+		}
+	}
+
+	public static ByteArrayInputStream treasRefreshReportCSV(long sigFileChanges, long treasMembChanges) {
+		final CSVFormat format = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.MINIMAL);
+
+		try (ByteArrayOutputStream out = new ByteArrayOutputStream();
+				CSVPrinter csvPrinter = new CSVPrinter(new PrintWriter(out), format);) {
+
+			List<String> row1 = Arrays.asList("Number of employees whose Signature File Name changed ",
+					String.valueOf(sigFileChanges));
+			csvPrinter.printRecord(row1);
+
+			List<String> row2 = Arrays.asList("Number of employees whose Treasurer Membership changed ",
+					String.valueOf(treasMembChanges));
+			csvPrinter.printRecord(row2);
+
+			csvPrinter.flush();
+			return new ByteArrayInputStream(out.toByteArray());
+		} catch (IOException e) {
+			throw new RuntimeException("Failed to import Treasurer List refresh data to CSV file: " + e.getMessage());
+		}
+	}
+
 }
