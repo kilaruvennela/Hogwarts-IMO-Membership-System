@@ -49,11 +49,12 @@ public class HogwartsEmployeeCSVService {
 	public ByteArrayInputStream loadReport() {
 		List<int[]> totalCount = hogwartsEmployeeRepository.countByCaseStatus();
 		List<Object[]> countBySectionList = hogwartsEmployeeRepository.countBySection();
+		List<Object[]> countBySection = backgroundDataRepository.countBySection();
 		List<Object[]> countBySectionFloorList = hogwartsEmployeeRepository.countBySectionFloor();
 		List<Object[]> membAccuracyList = hogwartsEmployeeRepository.membAccuracy();
 		List<Object[]> nonMembAccuracyList = hogwartsEmployeeRepository.nonMembAccuracy();
 		ByteArrayInputStream inputStream = HogwartsEmployeeCSVHelper.summaryReportCSV(totalCount, countBySectionList,
-				countBySectionFloorList, membAccuracyList, nonMembAccuracyList);
+				countBySection, countBySectionFloorList, membAccuracyList, nonMembAccuracyList);
 		return inputStream;
 	}
 
@@ -82,7 +83,8 @@ public class HogwartsEmployeeCSVService {
 					newEmployees++;
 					HogwartsEmployee masterEmployee = new HogwartsEmployee(refreshEmployeeId,
 							refreshEmployee.get("section"), refreshEmployee.get("floor"),
-							refreshEmployee.get("emailAddress"), "", "NM", "NM", "NM", "NM", "normal", "NM-OK");
+							refreshEmployee.get("emailAddress"), "", "non-member", "non-member", "non-member",
+							"non-member", "normal", "NM-OK");
 					hogwartsEmployeeRepository.save(masterEmployee);
 				}
 				BackgroundDataId backgroundDataId = new BackgroundDataId(refreshEmployee.get("section"),
@@ -209,7 +211,7 @@ public class HogwartsEmployeeCSVService {
 						employee.setSignatureFileName(treasStatusRecord.get("sigFilename"));
 
 					}
-					if (employee.getTreasurerMembership().equals("NM")) {
+					if (employee.getTreasurerMembership().equals("non-member")) {
 						treasMembChanges++;
 						employee.setTreasurerMembership("member");
 					}
@@ -235,17 +237,17 @@ public class HogwartsEmployeeCSVService {
 		String caseStatus = employee.getCaseStatus();
 		if (hqMemb.equals("member") && treasMemb.equals("member")) {
 			caseStatus = "member-ok";
-		} else if (hqMemb.equals("member") && treasMemb.equals("NM")) {
+		} else if (hqMemb.equals("member") && treasMemb.equals("non-member")) {
 			caseStatus = "member, missing our copy of card";
-		} else if (hqMemb.equals("NM") && treasMemb.equals("member")) {
+		} else if (hqMemb.equals("non-member") && treasMemb.equals("member")) {
 			caseStatus = "NM for HQ but we have card";
-		} else if (hqMemb.equals("NM") && treasMemb.equals("NM") && secMemb.equals("member")) {
+		} else if (hqMemb.equals("non-member") && treasMemb.equals("non-member") && secMemb.equals("member")) {
 			caseStatus = "NM for HQ but on our list";
-		} else if (hqMemb.equals("NM") && treasMemb.equals("NM") && secMemb.equals("NM")) {
+		} else if (hqMemb.equals("non-member") && treasMemb.equals("non-member") && secMemb.equals("non-member")) {
 			caseStatus = "NM-OK";
 		} else if (hqMemb.equals("missing") && (treasMemb.equals("member") || secMemb.equals("member"))) {
 			caseStatus = "member, not on IMO list";
-		} else if (hqMemb.equals("missing") && treasMemb.equals("NM") && secMemb.equals("NM")) {
+		} else if (hqMemb.equals("missing") && treasMemb.equals("non-member") && secMemb.equals("non-member")) {
 			caseStatus = "NM, not on IMO list";
 		}
 

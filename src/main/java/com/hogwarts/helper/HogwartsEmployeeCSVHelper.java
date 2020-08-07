@@ -51,23 +51,26 @@ public class HogwartsEmployeeCSVHelper {
 					if (hqMemb.equals("member") || treasMemb.equals("member") || secMemb.equals("member")) {
 						partyMemb = "member";
 					} else {
-						partyMemb = "NM";
+						partyMemb = "non-member";
 					}
 				}
 				if (caseStatus.length() == 0) {
 					if (hqMemb.equals("member") && treasMemb.equals("member")) {
 						caseStatus = "member-ok";
-					} else if (hqMemb.equals("member") && treasMemb.equals("NM")) {
+					} else if (hqMemb.equals("member") && treasMemb.equals("non-member")) {
 						caseStatus = "member, missing our copy of card";
-					} else if (hqMemb.equals("NM") && treasMemb.equals("member")) {
+					} else if (hqMemb.equals("non-member") && treasMemb.equals("member")) {
 						caseStatus = "NM for HQ but we have card";
-					} else if (hqMemb.equals("NM") && treasMemb.equals("NM") && secMemb.equals("member")) {
+					} else if (hqMemb.equals("non-member") && treasMemb.equals("non-member")
+							&& secMemb.equals("member")) {
 						caseStatus = "NM for HQ but on our list";
-					} else if (hqMemb.equals("NM") && treasMemb.equals("NM") && secMemb.equals("NM")) {
+					} else if (hqMemb.equals("non-member") && treasMemb.equals("non-member")
+							&& secMemb.equals("non-member")) {
 						caseStatus = "NM-OK";
 					} else if (hqMemb.equals("missing") && (treasMemb.equals("member") || secMemb.equals("member"))) {
 						caseStatus = "member, not on IMO list";
-					} else if (hqMemb.equals("missing") && treasMemb.equals("NM") && secMemb.equals("NM")) {
+					} else if (hqMemb.equals("missing") && treasMemb.equals("non-member")
+							&& secMemb.equals("non-member")) {
 						caseStatus = "NM, not on IMO list";
 					}
 				}
@@ -120,7 +123,7 @@ public class HogwartsEmployeeCSVHelper {
 	}
 
 	public static ByteArrayInputStream summaryReportCSV(List<int[]> totalCount, List<Object[]> countBySectionList,
-			List<Object[]> countBySectionFloorList, List<Object[]> membAccuracyList,
+			List<Object[]> countBySection, List<Object[]> countBySectionFloorList, List<Object[]> membAccuracyList,
 			List<Object[]> nonMembAccuracyList) {
 		final CSVFormat format = CSVFormat.DEFAULT.withQuoteMode(QuoteMode.MINIMAL);
 
@@ -139,17 +142,23 @@ public class HogwartsEmployeeCSVHelper {
 			csvPrinter.printRecord();
 			csvPrinter.printRecord();
 
-			List<String> header1 = Arrays.asList("SECTION", "MEMBERS", "NON-MEM", "TOTAL", "%MEMB");
+			List<String> header1 = Arrays.asList("SECTION", "MEMBERS", "NON-MEM", "TOTAL", "%MEMB", "", "Floors");
 			csvPrinter.printRecord(header1);
 			for (Object[] record : countBySectionList) {
-				long membSectionCount = (long) record[1];
-				long nonMembSectionCount = (long) record[2];
-				long totalSectionCount = membSectionCount + nonMembSectionCount;
-				double percentSecMemb = (double) Math.round(membSectionCount * 100) / totalSectionCount;
-				List<String> sectionData = Arrays.asList(String.valueOf(record[0]), String.valueOf(membSectionCount),
-						String.valueOf(nonMembSectionCount), String.valueOf(totalSectionCount),
-						String.valueOf(percentSecMemb));
-				csvPrinter.printRecord(sectionData);
+				for (Object[] recordCount : countBySection) {
+					if (String.valueOf(record[0]).equals(String.valueOf(recordCount[0]))) {
+						long membSectionCount = (long) record[1];
+						long nonMembSectionCount = (long) record[2];
+						long totalSectionCount = membSectionCount + nonMembSectionCount;
+						double percentSecMemb = (double) Math.round(membSectionCount * 100) / totalSectionCount;
+						List<String> sectionData = Arrays.asList(String.valueOf(record[0]),
+								String.valueOf(membSectionCount), String.valueOf(nonMembSectionCount),
+								String.valueOf(totalSectionCount), String.valueOf(percentSecMemb), "",
+								String.valueOf(recordCount[1]));
+						csvPrinter.printRecord(sectionData);
+					}
+				}
+
 			}
 
 			csvPrinter.printRecord();
